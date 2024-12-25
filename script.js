@@ -97,3 +97,45 @@ function salvarDados() {
 // Carregar tabelas ao iniciar
 atualizarTabelaEstoque();
 atualizarTabelaRelatorio();
+
+// Atualizar lista de produtos com baixa quantidade
+function atualizarTabelaBaixaQuantidade() {
+    const tabelaBaixaQuantidade = document.getElementById('tabela-baixa-quantidade');
+    tabelaBaixaQuantidade.innerHTML = '';
+
+    produtos.forEach((produto) => {
+        if (produto.quantidade < 3) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${produto.nome}</td>
+                <td>${produto.quantidade}</td>
+            `;
+            tabelaBaixaQuantidade.appendChild(row);
+        }
+    });
+}
+
+// Gerar documento Word com a lista de baixa quantidade
+function gerarWord() {
+    const tabela = document.getElementById('tabela-baixa-quantidade');
+    const linhas = tabela.querySelectorAll('tr');
+
+    let conteudo = `<table border="1" style="border-collapse: collapse; width: 100%;">`;
+    conteudo += `<tr><th>Nome</th><th>Quantidade</th></tr>`;
+    linhas.forEach((linha) => {
+        conteudo += `<tr>${linha.innerHTML}</tr>`;
+    });
+    conteudo += `</table>`;
+
+    const blob = new Blob(
+        [`<html><head><meta charset="UTF-8"></head><body>${conteudo}</body></html>`],
+        { type: 'application/msword' }
+    );
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'produtos_baixa_quantidade.doc';
+    link.click();
+}
+
+// Chamar ao iniciar ou quando atualizar o estoque
+atualizarTabelaBaixaQuantidade();
